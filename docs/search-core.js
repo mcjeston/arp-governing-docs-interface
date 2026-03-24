@@ -306,6 +306,21 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     lowered.includes("file") ||
     lowered.includes("process") ||
     lowered.includes("procedure");
+  const officeEligibilityQuestion =
+    (lowered.includes("deacon") ||
+      lowered.includes("deacons") ||
+      lowered.includes("elder") ||
+      lowered.includes("elders") ||
+      lowered.includes("officer") ||
+      lowered.includes("officers")) &&
+    (lowered.startsWith("who can") ||
+      lowered.startsWith("who may") ||
+      lowered.includes("can be") ||
+      lowered.includes("may be") ||
+      lowered.includes("eligible") ||
+      lowered.includes("eligibility") ||
+      lowered.includes("qualifications") ||
+      lowered.includes("qualified"));
   const definitionQuestion =
     lowered.startsWith("what is ") ||
     lowered.startsWith("what are ") ||
@@ -332,6 +347,26 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
 
   if (lowered.includes("church government") || lowered.includes("session") || lowered.includes("presbytery")) {
     ["government", "church", "session", "presbytery", "synod"].forEach((term) => terms.add(term));
+    priorityDocuments.add("form-of-government");
+    priorityCategories.add("church-government");
+  }
+
+  if (officeEligibilityQuestion) {
+    [
+      "eligible",
+      "eligibility",
+      "qualifications",
+      "qualified",
+      "office",
+      "offices",
+      "ordination",
+      "installation",
+      "member",
+      "members",
+      "full",
+      "active",
+      "communion"
+    ].forEach((term) => terms.add(term));
     priorityDocuments.add("form-of-government");
     priorityCategories.add("church-government");
   }
@@ -419,6 +454,7 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     disciplineQuestion,
     complaintQuestion,
     processQuestion,
+    officeEligibilityQuestion,
     definitionQuestion,
     definitionTarget
   };
@@ -555,6 +591,10 @@ function scoreChunk(queryProfile, chunk) {
     return 0;
   }
 
+  if (isReferenceStyleChunk(chunk)) {
+    return 0;
+  }
+
   let score = 0;
   let lexicalHits = 0;
   for (const term of queryProfile.terms) {
@@ -668,6 +708,24 @@ function scoreChunk(queryProfile, chunk) {
     }
   }
 
+  if (queryProfile.officeEligibilityQuestion) {
+    if (chunk.documentId === "form-of-government") {
+      score += 24;
+    }
+
+    if (/deacons?\s+and\s+the\s+diaconate|elders?\s+and\s+the\s+session|election,\s+ordination\s+and\s+installation/i.test(chunk.section ?? "")) {
+      score += 24;
+    }
+
+    if (/description and qualifications of a deacon|qualifications of an elder|eligibility/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+      score += 36;
+    }
+
+    if (/member in good standing|full and active communion|not be under any current or pending discipline|minimum age|recent converts|women can serve as deacons|male members/i.test(chunk.text)) {
+      score += 28;
+    }
+  }
+
   if (queryProfile.atonementQuestion) {
     if (chunk.category === "doctrinal-standards") {
       score += 20;
@@ -699,6 +757,10 @@ function scoreChunk(queryProfile, chunk) {
 }
 
 function directRelevanceScore(queryProfile, chunk) {
+  if (isReferenceStyleChunk(chunk)) {
+    return 0;
+  }
+
   const analysis = analyzeChunk(queryProfile, chunk);
   let score = 0;
 
@@ -770,6 +832,16 @@ function directRelevanceScore(queryProfile, chunk) {
 
     if (["larger-catechism", "shorter-catechism"].includes(chunk.documentId)) {
       score += 8;
+    }
+  }
+
+  if (queryProfile.officeEligibilityQuestion) {
+    if (/description and qualifications of a deacon|qualifications of an elder|eligibility/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+      score += 16;
+    }
+
+    if (/member in good standing|full and active communion|pending discipline|minimum age|recent converts|women can serve as deacons|male members/i.test(chunk.text)) {
+      score += 12;
     }
   }
 
@@ -865,6 +937,10 @@ function normalizeSentence(text) {
 }
 
 function maxChunksPerDocument(documentId, queryProfile) {
+  if (queryProfile.officeEligibilityQuestion && documentId === "form-of-government") {
+    return 3;
+  }
+
   if (queryProfile.complaintQuestion) {
     if (documentId === "book-of-discipline") {
       return 4;
@@ -918,6 +994,10 @@ function maxChunksPerDocument(documentId, queryProfile) {
 }
 
 function maxEvidenceCount(queryProfile) {
+  if (queryProfile.officeEligibilityQuestion) {
+    return 6;
+  }
+
   if (queryProfile.complaintQuestion || queryProfile.disciplineQuestion) {
     return 8;
   }
@@ -930,6 +1010,10 @@ function maxEvidenceCount(queryProfile) {
 }
 
 function directRelevanceFloor(queryProfile, documentId) {
+  if (queryProfile.officeEligibilityQuestion && documentId === "form-of-government") {
+    return 6;
+  }
+
   if (queryProfile.complaintQuestion && documentId === "book-of-discipline") {
     return 6;
   }
@@ -1216,6 +1300,11 @@ function looksLikeHeading(sentence) {
   }
 
   return normalized.length <= 80 && /^[A-Z0-9 .,'()\-]+$/.test(normalized);
+}
+
+function isReferenceStyleChunk(chunk) {
+  const combined = `${chunk.section ?? ""} ${chunk.text ?? ""}`;
+  return /table of contents/i.test(combined) || /(^|\s)index(\s|$)/i.test(combined);
 }
 
 function detectInlineReferenceKeys(text, nextSentence = "") {
