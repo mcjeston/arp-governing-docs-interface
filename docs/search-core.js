@@ -315,6 +315,12 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
       lowered.includes("officers")) &&
     (lowered.startsWith("who can") ||
       lowered.startsWith("who may") ||
+      lowered.startsWith("can women") ||
+      lowered.startsWith("can men") ||
+      lowered.startsWith("may women") ||
+      lowered.startsWith("may men") ||
+      lowered.includes("serve as deacons") ||
+      lowered.includes("serve as elders") ||
       lowered.includes("can be") ||
       lowered.includes("may be") ||
       lowered.includes("eligible") ||
@@ -383,6 +389,11 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
       "eligibility",
       "qualifications",
       "qualified",
+      "women",
+      "woman",
+      "men",
+      "male",
+      "female",
       "office",
       "offices",
       "ordination",
@@ -772,6 +783,12 @@ function scoreChunk(queryProfile, chunk) {
       score += 28;
     }
 
+    if (/(women|woman|female|male|men)/i.test(queryProfile.terms.join(" "))) {
+      if (/women can serve as deacons|male members of that congregation|qualified men to serve/i.test(chunk.text)) {
+        score += 40;
+      }
+    }
+
     if (queryProfile.officeFocus === "deacon") {
       if (/deacon|diaconate/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
         score += 18;
@@ -923,6 +940,12 @@ function directRelevanceScore(queryProfile, chunk) {
 
     if (/member in good standing|full and active communion|pending discipline|minimum age|recent converts|women can serve as deacons|male members/i.test(chunk.text)) {
       score += 12;
+    }
+
+    if (/(women|woman|female|male|men)/i.test(queryProfile.terms.join(" "))) {
+      if (/women can serve as deacons|male members of that congregation|qualified men to serve/i.test(chunk.text)) {
+        score += 16;
+      }
     }
 
     if (queryProfile.officeFocus === "deacon") {
