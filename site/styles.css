@@ -1,6 +1,7 @@
 :root {
   --bg: #f4f6fa;
   --panel: #ffffff;
+  --panel-soft: #fbfdff;
   --ink: #1f2b3a;
   --muted: #68778c;
   --line: #d8e1ec;
@@ -9,6 +10,7 @@
   --accent-soft: #e8f1fc;
   --gold: #f1cf6e;
   --gold-soft: #faf1cf;
+  --gold-ink: #6a5720;
   --shadow: 0 14px 32px rgba(19, 54, 108, 0.08);
   font-family: Georgia, "Times New Roman", serif;
 }
@@ -23,6 +25,22 @@ body {
   background:
     linear-gradient(180deg, rgba(30, 123, 230, 0.08), rgba(30, 123, 230, 0) 180px),
     var(--bg);
+}
+
+body[data-theme="dark"] {
+  --bg: #0f1723;
+  --panel: #162131;
+  --panel-soft: #1b2a40;
+  --ink: #edf3fb;
+  --muted: #b5c2d6;
+  --line: #2c3d56;
+  --accent: #64a8ff;
+  --accent-deep: #9ec8ff;
+  --accent-soft: #213754;
+  --gold: #f1cf6e;
+  --gold-soft: #3a311b;
+  --gold-ink: #f6dea0;
+  --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
 }
 
 .is-loading {
@@ -93,6 +111,13 @@ body {
   padding: 12px 4px 28px;
 }
 
+.hero-topline {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .hero-brand {
   display: flex;
   align-items: center;
@@ -126,7 +151,7 @@ body {
   margin: 0;
   font-size: clamp(2.2rem, 4vw, 3.7rem);
   line-height: 1.02;
-  color: #1d2735;
+  color: var(--ink);
 }
 
 .lede {
@@ -153,6 +178,8 @@ body {
 }
 
 .chat-panel {
+  display: flex;
+  flex-direction: column;
   background: var(--panel);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
@@ -166,7 +193,7 @@ body {
   padding: 24px;
   display: grid;
   gap: 16px;
-  background: #fbfdff;
+  background: var(--panel-soft);
 }
 
 .message {
@@ -174,7 +201,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px 18px;
-  background: #ffffff;
+  background: var(--panel);
 }
 
 .message-label {
@@ -197,12 +224,12 @@ body {
 
 .message-user {
   margin-left: auto;
-  background: #f8fbff;
+  background: var(--panel-soft);
 }
 
 .composer {
   padding: 20px;
-  background: #ffffff;
+  background: var(--panel);
   border-top: 1px solid var(--line);
 }
 
@@ -227,7 +254,7 @@ body {
   padding: 8px 12px;
   font: inherit;
   color: var(--ink);
-  background: #fbfdff;
+  background: var(--panel-soft);
 }
 
 .composer-type select:focus {
@@ -242,7 +269,7 @@ body {
   border-radius: 6px;
   padding: 14px 16px;
   font: inherit;
-  background: #fbfdff;
+  background: var(--panel-soft);
   color: var(--ink);
 }
 
@@ -318,6 +345,51 @@ button {
   cursor: pointer;
 }
 
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.theme-toggle:hover {
+  background: var(--panel-soft);
+}
+
+.theme-toggle-track {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: transform 180ms ease;
+}
+
+body[data-theme="dark"] .theme-toggle-thumb {
+  transform: translateX(20px);
+}
+
+.theme-toggle-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 button:hover {
   background: var(--accent-deep);
 }
@@ -331,7 +403,7 @@ button:hover {
   margin-top: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--panel-soft);
   padding: 10px 14px 14px;
 }
 
@@ -370,7 +442,7 @@ button:hover {
   border: 1px solid #e5d39a;
   background: var(--gold-soft);
   font-size: 0.88rem;
-  color: #6a5720;
+  color: var(--gold-ink);
 }
 
 .sr-only {
@@ -391,8 +463,9 @@ button:hover {
   }
 
   .chat-log {
+    order: 2;
     max-height: none;
-    min-height: 48vh;
+    min-height: 36vh;
     padding: 16px;
   }
 
@@ -400,12 +473,24 @@ button:hover {
     align-items: flex-start;
   }
 
+  .hero-topline {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .hero-logo {
     width: 60px;
   }
 
   .composer {
+    order: 1;
+    position: sticky;
+    top: 0;
+    z-index: 3;
     padding: 16px;
+    border-top: 0;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 8px 18px rgba(19, 54, 108, 0.08);
   }
 
   .composer-actions {
@@ -415,6 +500,19 @@ button:hover {
 
   button {
     width: 100%;
+  }
+
+  .composer textarea {
+    min-height: 120px;
+    font-size: 16px;
+  }
+
+  .composer-type select {
+    min-width: 100%;
+  }
+
+  .theme-toggle {
+    width: fit-content;
   }
 
   .loading-logo-stack {

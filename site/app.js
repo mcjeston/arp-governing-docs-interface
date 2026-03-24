@@ -7,6 +7,7 @@ import {
   sourceDescriptor
 } from "./search-core.js";
 
+const THEME_STORAGE_KEY = "arp-theme";
 const chatLog = document.getElementById("chat-log");
 const chatForm = document.getElementById("chat-form");
 const chatInput = document.getElementById("chat-input");
@@ -17,6 +18,8 @@ const loadingScreen = document.getElementById("loading-screen");
 const loadingText = document.getElementById("loading-text");
 const loadingLogoStack = document.getElementById("loading-logo-stack");
 const heroLogo = document.getElementById("hero-logo");
+const themeToggle = document.getElementById("theme-toggle");
+const themeToggleLabel = document.getElementById("theme-toggle-label");
 const apiBase = normalizeApiBase(window.ARP_API_BASE ?? "");
 
 let indexData = null;
@@ -24,12 +27,18 @@ let apiStatus = null;
 let loadingFillInterval = null;
 let pendingAssistantMessage = null;
 
+applyInitialTheme();
 startLoadingAnimation();
 initialize().catch((error) => {
   console.error(error);
   buildStatus.textContent = "The document index could not be loaded.";
   loadingText.textContent = "The interface could not finish loading.";
   finishLoadingSequence();
+});
+
+themeToggle?.addEventListener("click", () => {
+  const nextTheme = document.body.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(nextTheme);
 });
 
 chatForm.addEventListener("submit", async (event) => {
@@ -406,6 +415,40 @@ function highlightRelevantText(text, question) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function applyInitialTheme() {
+  const savedTheme = readSavedTheme();
+  const preferredTheme = window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  applyTheme(savedTheme || preferredTheme, false);
+}
+
+function applyTheme(theme, persist = true) {
+  const resolvedTheme = theme === "dark" ? "dark" : "light";
+  document.body.dataset.theme = resolvedTheme;
+  document.documentElement.style.colorScheme = resolvedTheme;
+  if (themeToggleLabel) {
+    themeToggleLabel.textContent = resolvedTheme === "dark" ? "Light Mode" : "Dark Mode";
+  }
+  themeToggle?.setAttribute("aria-pressed", resolvedTheme === "dark" ? "true" : "false");
+
+  if (!persist) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(THEME_STORAGE_KEY, resolvedTheme);
+  } catch {
+    // Ignore local storage failures.
+  }
+}
+
+function readSavedTheme() {
+  try {
+    return window.localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    return null;
+  }
 }
 
 function normalizeApiBase(value) {
