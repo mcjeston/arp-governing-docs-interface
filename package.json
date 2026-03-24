@@ -1,0 +1,18 @@
+{
+  "name": "arp-governing-chat",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:data": "node scripts/build-data.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "build": "npm run build:data && npm run build:site",
+    "preview": "node server/app-server.mjs",
+    "check:retrieval": "node scripts/check-retrieval.mjs"
+  },
+  "dependencies": {
+    "@opendataloader/pdf": "^2.0.0",
+    "cheerio": "^1.1.0",
+    "openai": "^5.12.2"
+  }
+}

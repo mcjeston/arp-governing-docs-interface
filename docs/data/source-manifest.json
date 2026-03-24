@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-03-24T15:11:28.459Z",
+  "language": "en",
+  "governingPageHash": "57305549880861778576b95ba3391e027c04308a882a3d86d1cac72b7dcc7967",
+  "beliefsPageHash": "068c1368d162c2154f50139deb96d9f9f18eaef0d06c7141ca2d4c929d1fb6a4",
+  "documents": [
+    {
+      "slug": "confession-of-faith",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Confession-of-Faith-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:23:46 GMT",
+      "contentLength": "416688"
+    },
+    {
+      "slug": "larger-catechism",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Larger-Catechism-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:37:37 GMT",
+      "contentLength": "702281"
+    },
+    {
+      "slug": "shorter-catechism",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Shorter-Catechism-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:38:42 GMT",
+      "contentLength": "275396"
+    },
+    {
+      "slug": "form-of-government",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/FOG-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:39:48 GMT",
+      "contentLength": "666178"
+    },
+    {
+      "slug": "book-of-discipline",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Book-of-Discipline-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:41:21 GMT",
+      "contentLength": "766236"
+    },
+    {
+      "slug": "directory-of-public-worship",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/THE-DIRECTORY-OF-PUBLIC-WORSHIP-1.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:42:22 GMT",
+      "contentLength": "302903"
+    },
+    {
+      "slug": "directory-of-private-and-family-worship",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/The-Directory-of-Private-Family-Worship-Sept-2023.pdf",
+      "lastModified": "Wed, 12 Mar 2025 18:43:30 GMT",
+      "contentLength": "165884"
+    },
+    {
+      "slug": "manual-of-authorities-and-duties",
+      "url": "https://arpchurch.org/wp-content/uploads/2026/02/MAD-2026-Final.pdf",
+      "lastModified": "Thu, 12 Feb 2026 21:02:45 GMT",
+      "contentLength": "874493"
+    }
+  ]
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Governing Documents Interface</title>
+    <meta
+      name="description"
+      content="Search the current ARP governing documents and belief summaries with page-level citations."
+    >
+    <link rel="icon" type="image/png" href="./arp-logo.png">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body class="is-loading">
+    <div class="loading-screen" id="loading-screen" aria-live="polite">
+      <div class="loading-logo-wrap">
+        <div class="loading-logo-stack" id="loading-logo-stack">
+          <img class="loading-logo loading-logo-base" src="./arp-logo.png" alt="" aria-hidden="true">
+          <div class="loading-logo-fill-mask" id="loading-logo-fill-mask">
+            <img class="loading-logo loading-logo-fill" src="./arp-logo.png" alt="" aria-hidden="true">
+          </div>
+        </div>
+        <p class="loading-text" id="loading-text">Opening interface and refreshing ARP data...</p>
+      </div>
+    </div>
+
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-brand">
+          <img
+            class="hero-logo"
+            id="hero-logo"
+            src="./arp-logo.png"
+            alt="Associate Reformed Presbyterian Church logo"
+          >
+          <p class="eyebrow">Associate Reformed Presbyterian Church</p>
+        </div>
+        <h1>Governing Documents Interface</h1>
+        <p class="lede">
+          Answers are drawn from the latest ARP governing documents. Ask about things like doctrine,
+          discipline, church government, or worship.
+        </p>
+        <div class="hero-meta">
+          <a href="https://arpchurch.org/governing-documents/" target="_blank" rel="noreferrer">ARP Governing Documents</a>
+          <a href="https://arpchurch.org/what-we-believe/" target="_blank" rel="noreferrer">ARP Position Statements</a>
+        </div>
+      </section>
+
+      <section class="chat-panel">
+        <div class="chat-log" id="chat-log" aria-live="polite">
+          <article class="message message-assistant">
+            <div class="message-label">Assistant</div>
+            <p>
+              Ask a question like "Who may bring a disciplinary charge?" or "What does the ARP
+              Confession say about Scripture?"
+            </p>
+          </article>
+        </div>
+
+        <form class="composer" id="chat-form">
+          <div class="composer-options">
+            <label class="composer-type" for="question-type">
+              <span>Question Type</span>
+              <select id="question-type" name="questionType">
+                <option value="auto" selected>Auto</option>
+                <option value="doctrine">Doctrine</option>
+                <option value="government">Government</option>
+                <option value="procedure">Procedure</option>
+                <option value="worship">Worship</option>
+              </select>
+            </label>
+          </div>
+          <label class="sr-only" for="chat-input">Question</label>
+          <textarea
+            id="chat-input"
+            name="question"
+            rows="3"
+            placeholder="Ask a question grounded in ARP governing documents..."
+            required
+          ></textarea>
+          <div class="composer-actions">
+            <p class="composer-note" id="build-status">Loading current document index...</p>
+            <button type="submit">Search</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <template id="message-template">
+      <article class="message">
+        <div class="message-label"></div>
+        <div class="message-body"></div>
+      </article>
+    </template>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

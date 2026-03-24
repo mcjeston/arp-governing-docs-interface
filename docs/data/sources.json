@@ -1,0 +1,147 @@
+{
+  "generatedAt": "2026-03-24T15:11:28.459Z",
+  "governingDocs": [
+    {
+      "slug": "confession-of-faith",
+      "title": "Confession of Faith",
+      "category": "doctrinal-standards",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Confession-of-Faith-Sept-2023.pdf"
+    },
+    {
+      "slug": "larger-catechism",
+      "title": "Larger Catechism",
+      "category": "doctrinal-standards",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Larger-Catechism-Sept-2023.pdf"
+    },
+    {
+      "slug": "shorter-catechism",
+      "title": "Shorter Catechism",
+      "category": "doctrinal-standards",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Shorter-Catechism-Sept-2023.pdf"
+    },
+    {
+      "slug": "form-of-government",
+      "title": "Form of Government",
+      "category": "church-government",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/FOG-Sept-2023.pdf"
+    },
+    {
+      "slug": "book-of-discipline",
+      "title": "Book of Discipline",
+      "category": "discipline",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/Book-of-Discipline-Sept-2023.pdf"
+    },
+    {
+      "slug": "directory-of-public-worship",
+      "title": "Directory of Public Worship",
+      "category": "worship-and-authorities",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/THE-DIRECTORY-OF-PUBLIC-WORSHIP-1.pdf"
+    },
+    {
+      "slug": "directory-of-private-and-family-worship",
+      "title": "Directory of Private and Family Worship",
+      "category": "worship-and-authorities",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2025/03/The-Directory-of-Private-Family-Worship-Sept-2023.pdf"
+    },
+    {
+      "slug": "manual-of-authorities-and-duties",
+      "title": "Manual of Authorities and Duties",
+      "category": "worship-and-authorities",
+      "language": "en",
+      "url": "https://arpchurch.org/wp-content/uploads/2026/02/MAD-2026-Final.pdf"
+    }
+  ],
+  "beliefContextSections": [
+    {
+      "title": "What We Believe",
+      "section": "Who We are in Christ, Facing the 21st Century",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Definition of Evangelical",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Abortion",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Homosexuality",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Scripture",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "New Perspective/Federal Vision Theology",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Women in the Life of the Church",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Historicity of Adam",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Marriage",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Slavery and Racism",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Virtual Communion",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Philosophy of Christian Higher Education",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Statement on Stewardship",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    },
+    {
+      "title": "What We Believe",
+      "section": "Fundraising",
+      "category": "belief-context",
+      "sourceUrl": "https://arpchurch.org/what-we-believe/"
+    }
+  ]
+}
