@@ -354,10 +354,26 @@ button {
   color: var(--ink);
   border: 1px solid var(--line);
   box-shadow: none;
+  font-size: 0;
 }
 
 .theme-toggle:hover {
   background: var(--panel-soft);
+}
+
+.theme-toggle::before,
+.theme-toggle::after {
+  font-size: 15px;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.theme-toggle::before {
+  content: "☀";
+}
+
+.theme-toggle::after {
+  content: "☾";
 }
 
 .theme-toggle-track {
@@ -395,6 +411,10 @@ body[data-theme="dark"] .theme-toggle-thumb {
   transition: color 180ms ease, opacity 180ms ease;
 }
 
+.theme-toggle-label {
+  display: none !important;
+}
+
 .theme-icon svg {
   width: 100%;
   height: 100%;
@@ -411,13 +431,24 @@ body[data-theme="dark"] .theme-toggle-thumb {
 }
 
 body[data-theme="light"] .theme-icon-sun,
+body[data-theme="light"] .theme-toggle::before,
 body[data-theme="dark"] .theme-icon-moon {
   color: var(--accent);
   opacity: 1;
 }
 
 body[data-theme="light"] .theme-icon-moon,
+body[data-theme="dark"] .theme-toggle::before,
 body[data-theme="dark"] .theme-icon-sun {
+  opacity: 0.55;
+}
+
+body[data-theme="dark"] .theme-toggle::after {
+  color: var(--accent);
+  opacity: 1;
+}
+
+body[data-theme="light"] .theme-toggle::after {
   opacity: 0.55;
 }
 
