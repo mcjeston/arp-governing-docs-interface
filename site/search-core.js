@@ -321,12 +321,38 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
       lowered.includes("eligibility") ||
       lowered.includes("qualifications") ||
       lowered.includes("qualified"));
+  const officeDutiesQuestion =
+    (lowered.includes("deacon") ||
+      lowered.includes("deacons") ||
+      lowered.includes("elder") ||
+      lowered.includes("elders") ||
+      lowered.includes("minister") ||
+      lowered.includes("ministers") ||
+      lowered.includes("officer") ||
+      lowered.includes("officers")) &&
+    (lowered.startsWith("what do") ||
+      lowered.startsWith("what does") ||
+      lowered.includes("duties") ||
+      lowered.includes("responsibilities") ||
+      lowered.includes("role") ||
+      lowered.includes("roles") ||
+      lowered.includes("purpose") ||
+      lowered.includes("function") ||
+      lowered.includes("functions"));
   const definitionQuestion =
     lowered.startsWith("what is ") ||
     lowered.startsWith("what are ") ||
     lowered.startsWith("who is ") ||
     lowered.startsWith("who are ");
   const definitionTarget = extractDefinitionTarget(lowered);
+  const officeFocus =
+    lowered.includes("deacon") || lowered.includes("deacons")
+      ? "deacon"
+      : lowered.includes("elder") || lowered.includes("elders")
+        ? "elder"
+        : lowered.includes("minister") || lowered.includes("ministers") || lowered.includes("pastor") || lowered.includes("pastors")
+          ? "minister"
+          : "";
 
   applyIntentHints(classification, priorityDocuments, priorityCategories, terms);
 
@@ -366,6 +392,25 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
       "full",
       "active",
       "communion"
+    ].forEach((term) => terms.add(term));
+    priorityDocuments.add("form-of-government");
+    priorityCategories.add("church-government");
+  }
+
+  if (officeDutiesQuestion) {
+    [
+      "duties",
+      "responsibilities",
+      "responsibility",
+      "purpose",
+      "role",
+      "service",
+      "serve",
+      "ministry",
+      "oversight",
+      "mercy",
+      "stewardship",
+      "property"
     ].forEach((term) => terms.add(term));
     priorityDocuments.add("form-of-government");
     priorityCategories.add("church-government");
@@ -455,6 +500,8 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     complaintQuestion,
     processQuestion,
     officeEligibilityQuestion,
+    officeDutiesQuestion,
+    officeFocus,
     definitionQuestion,
     definitionTarget
   };
@@ -724,6 +771,40 @@ function scoreChunk(queryProfile, chunk) {
     if (/member in good standing|full and active communion|not be under any current or pending discipline|minimum age|recent converts|women can serve as deacons|male members/i.test(chunk.text)) {
       score += 28;
     }
+
+    if (queryProfile.officeFocus === "deacon") {
+      if (/deacon|diaconate/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 18;
+      }
+
+      if (/elder|minister|pastor/i.test(`${chunk.section ?? ""}`) && !/deacon|diaconate/i.test(`${chunk.section ?? ""}`)) {
+        score -= 18;
+      }
+    }
+  }
+
+  if (queryProfile.officeDutiesQuestion) {
+    if (chunk.documentId === "form-of-government") {
+      score += 22;
+    }
+
+    if (/purpose of the diaconate|responsibilities|duties|relationship to the session|the elder and the session/i.test(chunk.section ?? "")) {
+      score += 30;
+    }
+
+    if (/mercy ministry|stewardship|offerings|care of the general property|service after the example of christ|visit|pray|oversight|shepherd/i.test(chunk.text)) {
+      score += 28;
+    }
+
+    if (queryProfile.officeFocus === "deacon") {
+      if (/deacon|diaconate/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 22;
+      }
+
+      if (/minister|pastor|elder|session/i.test(`${chunk.section ?? ""}`) && !/deacon|diaconate/i.test(`${chunk.section ?? ""}`)) {
+        score -= 18;
+      }
+    }
   }
 
   if (queryProfile.atonementQuestion) {
@@ -843,6 +924,36 @@ function directRelevanceScore(queryProfile, chunk) {
     if (/member in good standing|full and active communion|pending discipline|minimum age|recent converts|women can serve as deacons|male members/i.test(chunk.text)) {
       score += 12;
     }
+
+    if (queryProfile.officeFocus === "deacon") {
+      if (/deacon|diaconate/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 10;
+      }
+
+      if (/elder|minister|pastor/i.test(`${chunk.section ?? ""}`) && !/deacon|diaconate/i.test(`${chunk.section ?? ""}`)) {
+        score -= 8;
+      }
+    }
+  }
+
+  if (queryProfile.officeDutiesQuestion) {
+    if (/purpose of the diaconate|responsibilities|duties|relationship to the session|the elder and the session/i.test(`${chunk.section ?? ""}`)) {
+      score += 16;
+    }
+
+    if (/mercy ministry|stewardship|offerings|care of the general property|service after the example of christ|visit|pray|oversight|shepherd/i.test(chunk.text)) {
+      score += 12;
+    }
+
+    if (queryProfile.officeFocus === "deacon") {
+      if (/deacon|diaconate/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 10;
+      }
+
+      if (/minister|pastor|elder|session/i.test(`${chunk.section ?? ""}`) && !/deacon|diaconate/i.test(`${chunk.section ?? ""}`)) {
+        score -= 8;
+      }
+    }
   }
 
   if (queryProfile.atonementQuestion) {
@@ -937,6 +1048,10 @@ function normalizeSentence(text) {
 }
 
 function maxChunksPerDocument(documentId, queryProfile) {
+  if (queryProfile.officeDutiesQuestion && documentId === "form-of-government") {
+    return 3;
+  }
+
   if (queryProfile.officeEligibilityQuestion && documentId === "form-of-government") {
     return 3;
   }
@@ -994,6 +1109,10 @@ function maxChunksPerDocument(documentId, queryProfile) {
 }
 
 function maxEvidenceCount(queryProfile) {
+  if (queryProfile.officeDutiesQuestion) {
+    return 6;
+  }
+
   if (queryProfile.officeEligibilityQuestion) {
     return 6;
   }
@@ -1010,6 +1129,10 @@ function maxEvidenceCount(queryProfile) {
 }
 
 function directRelevanceFloor(queryProfile, documentId) {
+  if (queryProfile.officeDutiesQuestion && documentId === "form-of-government") {
+    return 6;
+  }
+
   if (queryProfile.officeEligibilityQuestion && documentId === "form-of-government") {
     return 6;
   }
