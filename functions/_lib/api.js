@@ -289,7 +289,8 @@ async function requestOpenAIAnswer(env, instructions, question, classificationCo
     throw new Error(apiMessage);
   }
 
-  return `${payload.output_text ?? ""}`.trim() || "The model did not return a text answer.";
+  const extractedText = extractResponseText(payload);
+  return extractedText || "The model did not return a text answer.";
 }
 
 async function consumeDailyQuota(env, clientKey) {
@@ -386,4 +387,25 @@ function jsonResponse(payload, status = 200) {
       "cache-control": "no-store"
     }
   });
+}
+
+function extractResponseText(payload) {
+  const direct = `${payload?.output_text ?? ""}`.trim();
+  if (direct) {
+    return direct;
+  }
+
+  const outputs = Array.isArray(payload?.output) ? payload.output : [];
+  const collected = [];
+
+  for (const item of outputs) {
+    const contents = Array.isArray(item?.content) ? item.content : [];
+    for (const content of contents) {
+      if (content?.type === "output_text" && `${content?.text ?? ""}`.trim()) {
+        collected.push(`${content.text}`.trim());
+      }
+    }
+  }
+
+  return collected.join("\n\n").trim();
 }
