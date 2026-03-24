@@ -591,7 +591,7 @@ function scoreChunk(queryProfile, chunk) {
     return 0;
   }
 
-  if (isReferenceStyleChunk(chunk)) {
+  if (isNonSubstantiveChunk(chunk)) {
     return 0;
   }
 
@@ -757,7 +757,7 @@ function scoreChunk(queryProfile, chunk) {
 }
 
 function directRelevanceScore(queryProfile, chunk) {
-  if (isReferenceStyleChunk(chunk)) {
+  if (isNonSubstantiveChunk(chunk)) {
     return 0;
   }
 
@@ -1305,6 +1305,58 @@ function looksLikeHeading(sentence) {
 function isReferenceStyleChunk(chunk) {
   const combined = `${chunk.section ?? ""} ${chunk.text ?? ""}`;
   return /table of contents/i.test(combined) || /(^|\s)index(\s|$)/i.test(combined);
+}
+
+function isNonSubstantiveChunk(chunk) {
+  const section = `${chunk.section ?? ""}`.trim();
+  const text = `${chunk.text ?? ""}`.trim();
+  const combined = `${section} ${text}`.replace(/\s+/g, " ").trim();
+  const lowered = combined.toLowerCase();
+
+  if (!combined) {
+    return true;
+  }
+
+  if (isReferenceStyleChunk(chunk)) {
+    return true;
+  }
+
+  if (/^(contents?|index|indices|appendix|appendices|foreword|preface)$/i.test(section)) {
+    return true;
+  }
+
+  if (/table of contents|scripture index|subject index|topical index|alphabetical index/i.test(lowered)) {
+    return true;
+  }
+
+  if (/^chapter\s+\d+\b/i.test(text) && text.length < 80) {
+    return true;
+  }
+
+  if (/revision history|history of revisions|historical note|amendment history|adopted in|revised in|ordered in/i.test(lowered)) {
+    if (!/(shall|must|may|should|is|are|office|discipline|worship|government|member|deacon|elder|minister|session|presbytery|synod|complaint|appeal|charge|sin|christ|god|justification|judgment)/i.test(lowered)) {
+      return true;
+    }
+  }
+
+  if (/see also|cross reference|refer to|see fog|see bod|see wcf|see lc|see sc/i.test(lowered)) {
+    if (text.length < 220) {
+      return true;
+    }
+  }
+
+  const tokens = lowered.split(/\s+/).filter(Boolean);
+  const uniqueTokens = new Set(tokens);
+  const hasVeryLowDiversity = tokens.length >= 12 && uniqueTokens.size / tokens.length < 0.45;
+  const looksLikeListOnly =
+    /^[-•]/.test(text) &&
+    !/[.?!]/.test(text) &&
+    /(chapter|section|page|contents|index)/i.test(text);
+  if (hasVeryLowDiversity && looksLikeListOnly) {
+    return true;
+  }
+
+  return false;
 }
 
 function detectInlineReferenceKeys(text, nextSentence = "") {
