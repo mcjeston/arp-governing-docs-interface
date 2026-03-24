@@ -3,6 +3,8 @@ node_modules/
 build/
 vendor/
 .env.local
+.dev.vars
+.dev.vars.*
 .tools/
 .preview-server.json
 .usage-limits.json

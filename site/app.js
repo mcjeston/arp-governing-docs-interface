@@ -17,6 +17,7 @@ const loadingScreen = document.getElementById("loading-screen");
 const loadingText = document.getElementById("loading-text");
 const loadingLogoStack = document.getElementById("loading-logo-stack");
 const heroLogo = document.getElementById("hero-logo");
+const apiBase = normalizeApiBase(window.ARP_API_BASE ?? "");
 
 let indexData = null;
 let apiStatus = null;
@@ -69,7 +70,7 @@ async function initialize() {
 
   const [indexResponse, healthResponse] = await Promise.all([
     fetch("./data/search-index.json", { cache: "no-store" }),
-    fetch("./api/health", { cache: "no-store" }).catch(() => null)
+    fetch(apiUrl("/api/health"), { cache: "no-store" }).catch(() => null)
   ]);
 
   if (!indexResponse.ok) {
@@ -95,7 +96,7 @@ async function waitForRefresh() {
 
   while (attempts < 120) {
     attempts += 1;
-    const response = await fetch("./api/status", { cache: "no-store" }).catch(() => null);
+    const response = await fetch(apiUrl("/api/status"), { cache: "no-store" }).catch(() => null);
     if (!response || !response.ok) {
       loadingText.textContent = "Opening interface...";
       await delay(300);
@@ -128,7 +129,7 @@ async function waitForRefresh() {
 
 async function askAssistant(question, selectedQuestionType) {
   try {
-    const response = await fetch("./api/chat", {
+    const response = await fetch(apiUrl("/api/chat"), {
       method: "POST",
       headers: {
         "content-type": "application/json"
@@ -405,4 +406,17 @@ function highlightRelevantText(text, question) {
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeApiBase(value) {
+  const raw = `${value ?? ""}`.trim();
+  if (!raw) {
+    return "";
+  }
+
+  return raw.endsWith("/") ? raw.slice(0, -1) : raw;
+}
+
+function apiUrl(path) {
+  return apiBase ? `${apiBase}${path}` : `.${path}`;
 }

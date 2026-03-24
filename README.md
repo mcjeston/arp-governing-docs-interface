@@ -74,6 +74,7 @@ The default configuration uses `gpt-5.4` for stronger reasoning over the ARP sou
 The included GitHub Actions workflow:
 
 - runs on manual dispatch
+- runs on every push to `main`
 - rebuilds every Monday at 11:00 UTC
 - deploys the static site from `docs/` to GitHub Pages
 
@@ -91,6 +92,45 @@ The included GitHub Actions workflow:
 
 - Double-click `Run-Preview.vbs` to refresh the ARP data in the background, start the local preview server, and open the interface in your browser.
 
+## Cloudflare Pages + Functions
+
+This repo is now prepared for a Cloudflare-hosted LLM setup.
+
+Files added for Cloudflare:
+
+- `functions/api/chat.js`
+- `functions/api/health.js`
+- `functions/api/status.js`
+- `functions/_lib/api.js`
+- `wrangler.toml`
+
+Recommended production setup:
+
+1. GitHub remains the source repo.
+2. Cloudflare Pages deploys the front-end from `docs/`.
+3. Cloudflare Functions handles `/api/chat`, `/api/health`, and `/api/status`.
+4. Cloudflare secrets hold the OpenAI key and model config.
+5. A Cloudflare KV binding named `USAGE_LIMITS` enforces the daily per-user LLM cap.
+
+Cloudflare environment variables / secrets:
+
+```text
+OPENAI_API_KEY=your_openai_api_key_here
+OPENAI_MODEL=gpt-5.4
+OPENAI_REASONING_EFFORT=medium
+OPENAI_DAILY_LIMIT=25
+```
+
+Cloudflare binding:
+
+- KV namespace binding name: `USAGE_LIMITS`
+
+Notes:
+
+- If `USAGE_LIMITS` is not configured, the Cloudflare API will still work, but the daily limit will not be enforced across requests.
+- The front-end will use same-origin `/api/...` routes on Cloudflare automatically.
+- If you later move the front-end somewhere else, you can set `window.ARP_API_BASE` before `app.js` loads and point the UI to another backend URL.
+
 ## Bluehost migration path
 
 When you move this to Bluehost later:
@@ -107,3 +147,4 @@ That lets you preserve the same interface while upgrading from static retrieval 
 - GitHub Pages hosting uses the browser fallback mode unless you point the frontend at an external backend API.
 - The local preview server provides the OpenAI-backed mode, but GitHub Pages itself does not run the Node backend.
 - For public production hosting with LLM answers, keep the same frontend and connect it to your own deployed backend API.
+- Cloudflare LLM mode requires you to set the Pages environment variables/secrets and add the `USAGE_LIMITS` KV binding in the Cloudflare dashboard.
