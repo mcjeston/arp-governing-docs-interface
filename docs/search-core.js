@@ -166,6 +166,7 @@ export function classifyQuestion(question, overrideType = "auto") {
     lowered.includes("lord's supper") ||
     lowered.includes("sacrament") ||
     lowered.includes("baptism") ||
+    lowered.includes("baptized") ||
     lowered.includes("public worship") ||
     lowered.includes("private worship");
   if (isWorship) {
@@ -213,6 +214,13 @@ export function classifyQuestion(question, overrideType = "auto") {
     lowered.includes("jesus") ||
     lowered.includes("christ") ||
     lowered.includes("god") ||
+    lowered.includes("baptism") ||
+    lowered.includes("baptized") ||
+    lowered.includes("infant") ||
+    lowered.includes("infants") ||
+    lowered.includes("baby") ||
+    lowered.includes("babies") ||
+    lowered.includes("children") ||
     lowered.includes("salvation") ||
     lowered.includes("elect") ||
     lowered.includes("election") ||
@@ -276,6 +284,11 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     (lowered.includes("civil") && lowered.includes("government")) ||
     lowered.includes("magistrate");
   const worshipQuestion = lowered.includes("worship");
+  const baptismQuestion =
+    lowered.includes("baptism") ||
+    lowered.includes("baptized") ||
+    ((lowered.includes("baby") || lowered.includes("babies") || lowered.includes("infant") || lowered.includes("infants") || lowered.includes("children")) &&
+      (lowered.includes("bapt") || lowered.startsWith("should ")));
   const emphasizeDoctrine =
     lowered.includes("what do we believe") ||
     lowered.includes("believe") ||
@@ -386,6 +399,31 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     ["worship", "directory", "public", "church"].forEach((term) => terms.add(term));
     priorityDocuments.add("directory-of-public-worship");
     priorityDocuments.add("confession-of-faith");
+    priorityCategories.add("worship-and-authorities");
+  }
+
+  if (baptismQuestion) {
+    [
+      "baptism",
+      "baptized",
+      "baptize",
+      "baptismal",
+      "infant",
+      "infants",
+      "baby",
+      "babies",
+      "children",
+      "believing",
+      "parents",
+      "visible",
+      "church",
+      "covenant"
+    ].forEach((term) => terms.add(term));
+    priorityDocuments.add("confession-of-faith");
+    priorityDocuments.add("larger-catechism");
+    priorityDocuments.add("shorter-catechism");
+    priorityDocuments.add("directory-of-public-worship");
+    priorityCategories.add("doctrinal-standards");
     priorityCategories.add("worship-and-authorities");
   }
 
@@ -531,6 +569,7 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     priorityCategories,
     civilGovernmentQuestion,
     worshipQuestion,
+    baptismQuestion,
     emphasizeDoctrine,
     atonementQuestion,
     judgmentQuestion,
@@ -774,6 +813,24 @@ function scoreChunk(queryProfile, chunk) {
     score += 8;
   }
 
+  if (queryProfile.baptismQuestion) {
+    if (["confession-of-faith", "larger-catechism", "shorter-catechism", "directory-of-public-worship"].includes(chunk.documentId)) {
+      score += 22;
+    }
+
+    if (["confession-of-faith", "larger-catechism", "shorter-catechism"].includes(chunk.documentId)) {
+      score += 20;
+    }
+
+    if (/of baptism|what is baptism|unto whom is baptism to be administered|to whom is baptism to be administered/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+      score += 34;
+    }
+
+    if (/infants of one or both believing parents are to be baptized|infants descending from parents|infants of such as are members of the visible church are to be baptized|children for baptism|covenant children/i.test(chunk.text)) {
+      score += 50;
+    }
+  }
+
   if (queryProfile.definitionQuestion && queryProfile.definitionTarget) {
     const targetPattern = escapeRegExp(queryProfile.definitionTarget);
     if (new RegExp(`what\\s+is\\s+${targetPattern}\\??`, "i").test(chunk.text)) {
@@ -949,6 +1006,20 @@ function directRelevanceScore(queryProfile, chunk) {
   if (queryProfile.worshipQuestion) {
     if (/worship/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
       score += 6;
+    }
+  }
+
+  if (queryProfile.baptismQuestion) {
+    if (/of baptism|what is baptism|unto whom is baptism to be administered|to whom is baptism to be administered/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+      score += 16;
+    }
+
+    if (/infants of one or both believing parents are to be baptized|infants descending from parents|infants of such as are members of the visible church are to be baptized|children for baptism|covenant children/i.test(chunk.text)) {
+      score += 18;
+    }
+
+    if (["confession-of-faith", "larger-catechism", "shorter-catechism"].includes(chunk.documentId)) {
+      score += 10;
     }
   }
 
@@ -1173,6 +1244,17 @@ function maxChunksPerDocument(documentId, queryProfile) {
     }
   }
 
+  if (queryProfile.baptismQuestion) {
+    if (
+      documentId === "confession-of-faith" ||
+      documentId === "larger-catechism" ||
+      documentId === "shorter-catechism" ||
+      documentId === "directory-of-public-worship"
+    ) {
+      return 3;
+    }
+  }
+
   if (queryProfile.emphasizeDoctrine) {
     if (
       documentId === "confession-of-faith" ||
@@ -1210,6 +1292,10 @@ function maxEvidenceCount(queryProfile) {
   }
 
   if (queryProfile.worshipQuestion || queryProfile.emphasizeDoctrine || queryProfile.atonementQuestion) {
+    return 7;
+  }
+
+  if (queryProfile.baptismQuestion) {
     return 7;
   }
 
