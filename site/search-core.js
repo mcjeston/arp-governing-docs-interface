@@ -143,6 +143,10 @@ export function classifyQuestion(question, overrideType = "auto") {
     "decrees",
     "covenant",
     "mediator",
+    "elect",
+    "election",
+    "predestination",
+    "predestinated",
     "church",
     "communion",
     "resurrection",
@@ -210,6 +214,10 @@ export function classifyQuestion(question, overrideType = "auto") {
     lowered.includes("christ") ||
     lowered.includes("god") ||
     lowered.includes("salvation") ||
+    lowered.includes("elect") ||
+    lowered.includes("election") ||
+    lowered.includes("predestination") ||
+    lowered.includes("predestinated") ||
     lowered.includes("justify") ||
     lowered.includes("justification") ||
     lowered.includes("redemption") ||
@@ -272,7 +280,11 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
     lowered.includes("what do we believe") ||
     lowered.includes("believe") ||
     lowered.includes("doctrine") ||
-    lowered.includes("confession");
+    lowered.includes("confession") ||
+    lowered.includes("elect") ||
+    lowered.includes("election") ||
+    lowered.includes("predestination") ||
+    lowered.includes("predestinated");
   const atonementQuestion =
     (lowered.includes("jesus") || lowered.includes("christ")) &&
     (lowered.includes("die") ||
@@ -462,6 +474,21 @@ export function buildQueryProfile(question, classification = classifyQuestion(qu
 
   if (emphasizeDoctrine) {
     ["confession", "catechism", "chapter"].forEach((term) => terms.add(term));
+    priorityDocuments.add("confession-of-faith");
+    priorityDocuments.add("larger-catechism");
+    priorityDocuments.add("shorter-catechism");
+    priorityCategories.add("doctrinal-standards");
+  }
+
+  if (
+    lowered.includes("elect") ||
+    lowered.includes("election") ||
+    lowered.includes("predestination") ||
+    lowered.includes("predestinated")
+  ) {
+    ["elect", "election", "predestination", "predestinated", "chosen", "called"].forEach((term) =>
+      terms.add(term)
+    );
     priorityDocuments.add("confession-of-faith");
     priorityDocuments.add("larger-catechism");
     priorityDocuments.add("shorter-catechism");
@@ -764,6 +791,25 @@ function scoreChunk(queryProfile, chunk) {
     if (["larger-catechism", "shorter-catechism"].includes(chunk.documentId)) {
       score += 20;
     }
+
+    if (
+      /^(elect|election|predestination|predestinated)$/.test(queryProfile.definitionTarget) &&
+      /whole number of the elect|all those whom god hath predestinated unto life|all the elect, and they only|the elect only/i.test(
+        `${chunk.section ?? ""} ${chunk.text}`
+      )
+    ) {
+      score += 60;
+    }
+
+    if (/^(elect|election|predestination|predestinated)$/.test(queryProfile.definitionTarget)) {
+      if (/invisible church|whole number of the elect|gathered into one under christ/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 45;
+      }
+
+      if (/god'?s elect|love to his elect|redeemer of god'?s elect/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score -= 20;
+      }
+    }
   }
 
   if (queryProfile.officeEligibilityQuestion) {
@@ -930,6 +976,25 @@ function directRelevanceScore(queryProfile, chunk) {
 
     if (["larger-catechism", "shorter-catechism"].includes(chunk.documentId)) {
       score += 8;
+    }
+
+    if (
+      /^(elect|election|predestination|predestinated)$/.test(queryProfile.definitionTarget) &&
+      /whole number of the elect|all those whom god hath predestinated unto life|all the elect, and they only|the elect only/i.test(
+        `${chunk.section ?? ""} ${chunk.text}`
+      )
+    ) {
+      score += 24;
+    }
+
+    if (/^(elect|election|predestination|predestinated)$/.test(queryProfile.definitionTarget)) {
+      if (/invisible church|whole number of the elect|gathered into one under christ/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score += 18;
+      }
+
+      if (/god'?s elect|love to his elect|redeemer of god'?s elect/i.test(`${chunk.section ?? ""} ${chunk.text}`)) {
+        score -= 8;
+      }
     }
   }
 

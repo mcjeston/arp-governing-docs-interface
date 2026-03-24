@@ -19,7 +19,6 @@ const loadingText = document.getElementById("loading-text");
 const loadingLogoStack = document.getElementById("loading-logo-stack");
 const heroLogo = document.getElementById("hero-logo");
 const themeToggle = document.getElementById("theme-toggle");
-const themeToggleLabel = document.getElementById("theme-toggle-label");
 const apiBase = normalizeApiBase(window.ARP_API_BASE ?? "");
 
 let indexData = null;
@@ -55,14 +54,17 @@ chatForm.addEventListener("submit", async (event) => {
 
   appendMessage("You", `<p>${escapeHtml(question)}</p>`, "message-user");
   chatInput.value = "";
+  activateMobileConversationMode();
   pendingAssistantMessage = appendMessage(
     "Assistant",
     `<p class="thinking-indicator">Thinking<span class="thinking-dots"></span></p>`,
     "message-assistant"
   );
+  focusMessage(pendingAssistantMessage);
 
   const response = await askAssistant(question, selectedQuestionType);
   replaceMessage(pendingAssistantMessage, "Assistant", renderAnswer(response, question), "message-assistant");
+  focusMessage(pendingAssistantMessage);
   pendingAssistantMessage = null;
   chatInput.focus();
 });
@@ -417,6 +419,27 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function activateMobileConversationMode() {
+  if (!window.matchMedia?.("(max-width: 720px)").matches) {
+    return;
+  }
+
+  document.body.classList.add("has-started-chat");
+}
+
+function focusMessage(article) {
+  if (!article || !window.matchMedia?.("(max-width: 720px)").matches) {
+    return;
+  }
+
+  window.setTimeout(() => {
+    article.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }, 80);
+}
+
 function applyInitialTheme() {
   const savedTheme = readSavedTheme();
   const preferredTheme = window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -427,9 +450,6 @@ function applyTheme(theme, persist = true) {
   const resolvedTheme = theme === "dark" ? "dark" : "light";
   document.body.dataset.theme = resolvedTheme;
   document.documentElement.style.colorScheme = resolvedTheme;
-  if (themeToggleLabel) {
-    themeToggleLabel.textContent = resolvedTheme === "dark" ? "Light Mode" : "Dark Mode";
-  }
   themeToggle?.setAttribute("aria-pressed", resolvedTheme === "dark" ? "true" : "false");
 
   if (!persist) {

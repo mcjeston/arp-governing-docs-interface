@@ -116,13 +116,13 @@ body[data-theme="dark"] {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  margin-bottom: 20px;
 }
 
 .hero-brand {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-bottom: 14px;
 }
 
 .hero-logo {
@@ -348,8 +348,8 @@ button {
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
+  gap: 8px;
+  padding: 7px 10px;
   background: var(--panel);
   color: var(--ink);
   border: 1px solid var(--line);
@@ -362,8 +362,8 @@ button {
 
 .theme-toggle-track {
   position: relative;
-  width: 46px;
-  height: 26px;
+  width: 40px;
+  height: 22px;
   border-radius: 999px;
   background: var(--accent-soft);
   border: 1px solid var(--line);
@@ -374,20 +374,51 @@ button {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
   background: var(--accent);
   transition: transform 180ms ease;
 }
 
 body[data-theme="dark"] .theme-toggle-thumb {
-  transform: translateX(20px);
+  transform: translateX(18px);
 }
 
-.theme-toggle-label {
-  font-size: 0.92rem;
-  font-weight: 700;
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 180ms ease, opacity 180ms ease;
+}
+
+.theme-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-icon-moon svg {
+  fill: currentColor;
+  stroke: none;
+}
+
+body[data-theme="light"] .theme-icon-sun,
+body[data-theme="dark"] .theme-icon-moon {
+  color: var(--accent);
+  opacity: 1;
+}
+
+body[data-theme="light"] .theme-icon-moon,
+body[data-theme="dark"] .theme-icon-sun {
+  opacity: 0.55;
 }
 
 button:hover {
@@ -476,6 +507,7 @@ button:hover {
   .hero-topline {
     flex-direction: column;
     align-items: stretch;
+    margin-bottom: 16px;
   }
 
   .hero-logo {
@@ -491,6 +523,18 @@ button:hover {
     border-top: 0;
     border-bottom: 1px solid var(--line);
     box-shadow: 0 8px 18px rgba(19, 54, 108, 0.08);
+  }
+
+  body.has-started-chat .chat-log {
+    order: 1;
+  }
+
+  body.has-started-chat .composer {
+    order: 2;
+    position: static;
+    border-top: 1px solid var(--line);
+    border-bottom: 0;
+    box-shadow: none;
   }
 
   .composer-actions {
