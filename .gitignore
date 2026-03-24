@@ -5,3 +5,4 @@ vendor/
 .env.local
 .tools/
 .preview-server.json
+.usage-limits.json

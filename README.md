@@ -56,18 +56,18 @@ To enable LLM-backed answers in local preview:
 1. Copy `.env.example` to `.env.local`
 2. Set `OPENAI_API_KEY`
 3. Optionally change `OPENAI_MODEL` and `OPENAI_REASONING_EFFORT`
+4. Optionally set `OPENAI_DAILY_LIMIT` to cap OpenAI-backed answers per user per day
 
 When `OPENAI_API_KEY` is present, the local preview server will:
 
 - retrieve from the ARP sources in priority order
 - send that evidence to the OpenAI Responses API
 - return a synthesized answer grounded in those citations
+- enforce a simple per-user daily limit for OpenAI-backed requests when `OPENAI_DAILY_LIMIT` is set to a positive number
 
 If no key is configured, the app falls back to the local citation-based answerer.
 
-For first-time verification, `gpt-5-mini` is a good default because it is faster and lower cost while still supporting the Responses API:
-
-- [GPT-5 mini](https://developers.openai.com/api/docs/models/gpt-5-mini)
+The default configuration uses `gpt-5.4` for stronger reasoning over the ARP source hierarchy. If you want a cheaper or faster option later, you can lower `OPENAI_MODEL` in `.env.local`.
 
 ## Deployment
 

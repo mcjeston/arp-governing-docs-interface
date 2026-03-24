@@ -19,6 +19,7 @@ const rootDir = path.resolve(__dirname, "..");
 const docsDir = path.join(rootDir, "docs");
 const dataPath = path.join(docsDir, "data", "search-index.json");
 const pidFilePath = path.join(rootDir, ".preview-server.json");
+const usageStorePath = path.join(rootDir, ".usage-limits.json");
 const port = Number(process.env.PORT || 4182);
 const responseVersion = "2026-03-24c";
 
@@ -27,6 +28,7 @@ loadEnvFile(path.join(rootDir, ".env.local"));
 const model = process.env.OPENAI_MODEL || "gpt-5.4";
 const reasoningEffort = process.env.OPENAI_REASONING_EFFORT || "medium";
 const apiKey = process.env.OPENAI_API_KEY || "";
+const dailyRequestLimit = Number(process.env.OPENAI_DAILY_LIMIT || 25);
 const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
 const contentTypes = {
@@ -87,7 +89,7 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "POST" && requestUrl.pathname === "/api/chat") {
       const body = await readJsonBody(request);
-      return await handleChat(body, response);
+      return await handleChat(request, body, response);
     }
 
     if (request.method === "GET") {
@@ -127,7 +129,8 @@ process.on("SIGTERM", () => {
   process.exit(0);
 });
 
-async function handleChat(body, response) {
+async function handleChat(request, body, response) {
+  const clientKey = getClientKey(body, requestIdentity(request));
   const question = `${body?.question ?? ""}`.trim();
   const questionType = `${body?.questionType ?? "auto"}`.trim() || "auto";
   const selectedCategory = `${body?.category ?? "all"}`.trim() || "all";
@@ -180,6 +183,20 @@ async function handleChat(body, response) {
       mode: "fallback",
       responseVersion,
       warning: "OPENAI_API_KEY is not configured. Showing the local citation-based answer instead.",
+      answer: localAnswer,
+      citations,
+      supplemental,
+      reviewedSources,
+      classification
+    });
+  }
+
+  const limitResult = consumeDailyQuota(clientKey);
+  if (!limitResult.allowed) {
+    return sendJson(response, 200, {
+      mode: "fallback",
+      responseVersion,
+      warning: `The daily OpenAI usage limit has been reached for this user (${limitResult.limit} requests per day). Showing the local citation-based answer instead.`,
       answer: localAnswer,
       citations,
       supplemental,
@@ -425,6 +442,85 @@ function loadEnvFile(filePath) {
   } catch {
     // Ignore missing env file.
   }
+}
+
+function requestIdentity(request) {
+  return {
+    forwardedFor: request?.headers?.["x-forwarded-for"] ?? "",
+    remoteAddress: request?.socket?.remoteAddress ?? ""
+  };
+}
+
+function getClientKey(body, identity) {
+  const explicitUser = `${body?.userId ?? ""}`.trim();
+  if (explicitUser) {
+    return `user:${explicitUser}`;
+  }
+
+  const forwarded = `${identity?.forwardedFor ?? ""}`
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)[0];
+  const address = forwarded || `${identity?.remoteAddress ?? ""}`.trim() || "anonymous";
+  return `ip:${address}`;
+}
+
+function consumeDailyQuota(clientKey) {
+  if (!Number.isFinite(dailyRequestLimit) || dailyRequestLimit <= 0) {
+    return {
+      allowed: true,
+      limit: dailyRequestLimit,
+      used: 0
+    };
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  const store = loadUsageStore();
+  if (store.date !== today) {
+    store.date = today;
+    store.clients = {};
+  }
+
+  const used = Number(store.clients[clientKey] ?? 0);
+  if (used >= dailyRequestLimit) {
+    return {
+      allowed: false,
+      limit: dailyRequestLimit,
+      used
+    };
+  }
+
+  store.clients[clientKey] = used + 1;
+  saveUsageStore(store);
+  return {
+    allowed: true,
+    limit: dailyRequestLimit,
+    used: used + 1
+  };
+}
+
+function loadUsageStore() {
+  try {
+    if (!existsSync(usageStorePath)) {
+      return { date: new Date().toISOString().slice(0, 10), clients: {} };
+    }
+
+    const parsed = JSON.parse(readFileSync(usageStorePath, "utf8"));
+    if (typeof parsed !== "object" || parsed === null) {
+      return { date: new Date().toISOString().slice(0, 10), clients: {} };
+    }
+
+    return {
+      date: `${parsed.date ?? ""}` || new Date().toISOString().slice(0, 10),
+      clients: typeof parsed.clients === "object" && parsed.clients !== null ? parsed.clients : {}
+    };
+  } catch {
+    return { date: new Date().toISOString().slice(0, 10), clients: {} };
+  }
+}
+
+function saveUsageStore(store) {
+  writeFileSync(usageStorePath, JSON.stringify(store, null, 2), "utf8");
 }
 
 function writePreviewPidFile() {
